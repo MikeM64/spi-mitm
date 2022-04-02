@@ -88,7 +88,6 @@ logic_analyzer_clk_o <= spi_clk_tap_v;
 
 spi_copi_tap_v := syscon_spi_copi_i when intercept_spi_en_i = '0' else intercept_spi_copi_i;
 cell_spi_copi_s <= spi_copi_tap_v;
---cell_spi_copi_o <= cell_spi_copi_s;
 logic_analyzer_copi_o <= cell_spi_copi_s;
 
 spi_cipo_tap_v := cell_spi_cipo_i;

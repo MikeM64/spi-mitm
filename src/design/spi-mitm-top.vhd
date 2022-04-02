@@ -46,7 +46,6 @@ end spi_mitm_top;
 architecture Behavioral of spi_mitm_top is
 
 signal cell_spi_copi_s: std_logic;
---signal cell_spi_clk_s: std_logic;
 
 begin
 
@@ -60,22 +59,11 @@ OBUF_cell_spi_copi_o : OBUF
         I => cell_spi_copi_s -- Buffer input
     );
 
---OBUF_cell_spi_clk_o : OBUF
---    generic map (
---        DRIVE => 12,
---        IOSTANDARD => "DEFAULT",
---        SLEW => "SLOW")
---    port map (
---        O => cell_spi_clk_o, -- Buffer output (connect directly to top-level port)
---        I => cell_spi_clk_s -- Buffer input
---    );
-
 spi_mtim_mux_proc: process(intercept_spi_en_i, syscon_spi_ce_i,
                            syscon_spi_clk_i, syscon_spi_copi_i,
                            cell_spi_cipo_i, intercept_spi_ce_i,
                            intercept_spi_clk_i, intercept_spi_copi_i,
                            cell_be_int_i, cell_sb_int_i, cell_spi_copi_s)
-                           --cell_spi_clk_s)
 
 variable spi_ce_tap_v, spi_clk_tap_v, spi_cipo_tap_v,
         spi_copi_tap_v, spi_be_int_tap_v, spi_sb_int_tap_v: std_logic;
@@ -95,7 +83,6 @@ cell_spi_ce_o <= spi_ce_tap_v;
 logic_analyzer_ce_o <= spi_ce_tap_v;
 
 spi_clk_tap_v := syscon_spi_clk_i when intercept_spi_en_i = '0' else intercept_spi_clk_i;
---cell_spi_clk_s <= spi_clk_tap_v;
 cell_spi_clk_o <= spi_clk_tap_v;
 logic_analyzer_clk_o <= spi_clk_tap_v;
 

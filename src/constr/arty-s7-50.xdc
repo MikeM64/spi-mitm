@@ -65,7 +65,7 @@ set_property -dict { PACKAGE_PIN U17   IOSTANDARD LVCMOS33 } [get_ports { interc
 set_property -dict { PACKAGE_PIN U18   IOSTANDARD LVCMOS33 } [get_ports { intercept_spi_copi_i }]; #IO_L15N_T2_DQS_DOUT_CSO_B_14 Sch=jc4/ck_io[38]
 #set_property -dict { PACKAGE_PIN U16   IOSTANDARD LVCMOS33 } [get_ports { intercept_spi_en_i }]; #IO_L16P_T2_CSI_B_14 Sch=jc7/ck_io[37]
 #set_property -dict { PACKAGE_PIN P13   IOSTANDARD LVCMOS33 } [get_ports { intercept_sb_int_i }]; #IO_L19P_T3_A10_D26_14 Sch=jc8/ck_io[36]
-#set_property -dict { PACKAGE_PIN R13   IOSTANDARD LVCMOS33 } [get_ports { intercept_spi_en_i }]; #IO_L19N_T3_A09_D25_VREF_14 Sch=jc9/ck_io[35]
+set_property -dict { PACKAGE_PIN R13   IOSTANDARD LVCMOS33 } [get_ports { intercept_int_en_i }]; #IO_L19N_T3_A09_D25_VREF_14 Sch=jc9/ck_io[35]
 set_property -dict { PACKAGE_PIN V14   IOSTANDARD LVCMOS33 } [get_ports { intercept_spi_en_i }]; #IO_L20P_T3_A08_D24_14 Sch=jc10/ck_io[34]
 
 ## Pmod Header JD

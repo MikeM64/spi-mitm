@@ -29,6 +29,7 @@ entity spi_mitm_top is
         intercept_spi_cipo_o    : out   std_logic;
         intercept_spi_copi_i    : in    std_logic;
         intercept_spi_en_i      : in    std_logic;
+        intercept_int_en_i      : in    std_logic;
         -- Interrupt pins
         syscon_be_int_o         : out   std_logic;
         syscon_sb_int_o         : out   std_logic;
@@ -71,11 +72,11 @@ variable spi_ce_tap_v, spi_clk_tap_v, spi_cipo_tap_v,
 begin
 
 spi_be_int_tap_v := cell_be_int_i;
-syscon_be_int_o <= spi_be_int_tap_v;
+syscon_be_int_o <= spi_be_int_tap_v when intercept_int_en_i = '0' else '1';
 logic_analyzer_be_int_o <= spi_be_int_tap_v;
 
 spi_sb_int_tap_v := cell_sb_int_i;
-syscon_sb_int_o <= spi_sb_int_tap_v;
+syscon_sb_int_o <= spi_sb_int_tap_v when intercept_int_en_i = '0' else '1';
 logic_analyzer_sb_int_o <= spi_sb_int_tap_v;
 
 spi_ce_tap_v := syscon_spi_ce_i when intercept_spi_en_i = '0' else intercept_spi_ce_i;

@@ -13,28 +13,30 @@ use UNISIM.vcomponents.all;
 
 entity spi_mitm_top is
     Port (
-        -- Syscon SPI Port
-        syscon_spi_ce_i         : in    std_logic;
-        syscon_spi_clk_i        : in    std_logic;
-        syscon_spi_cipo_o       : out   std_logic;
-        syscon_spi_copi_i       : in    std_logic;
-        -- Cell SPI Port
-        cell_spi_ce_o           : out   std_logic;
-        cell_spi_clk_o          : out   std_logic;
-        cell_spi_cipo_i         : in    std_logic;
-        cell_spi_copi_o         : out   std_logic;
-        -- Intercept SPI
-        intercept_spi_ce_io     : inout std_logic;
-        intercept_spi_clk_io    : inout std_logic;
-        intercept_spi_cipo_o    : out   std_logic;
-        intercept_spi_copi_io   : inout std_logic;
-        intercept_spi_en_i      : in    std_logic;
-        intercept_int_en_i      : in    std_logic;
+        -- Controller 0 SPI Port
+        controller0_spi_ce_i    : in    std_logic;
+        controller0_spi_clk_i   : in    std_logic;
+        controller0_spi_cipo_o  : out   std_logic;
+        controller0_spi_copi_i  : in    std_logic;
+        -- Peripheral SPI Port
+        peripheral_spi_ce_o     : out   std_logic;
+        peripheral_spi_clk_o    : out   std_logic;
+        peripheral_spi_cipo_i   : in    std_logic;
+        peripheral_spi_copi_o   : out   std_logic;
+        -- Controller 1 SPI
+        controller1_spi_ce_io   : inout std_logic;
+        controller1_spi_clk_io  : inout std_logic;
+        controller1_spi_cipo_o  : out   std_logic;
+        controller1_spi_copi_io : inout std_logic;
+        -- SPI Enable; 0 == Controller 0, 1 == Controller 1
+        controller1_spi_en_i    : in    std_logic;
+        -- Interrupt pin enable; 0 == interrupt pins enabled, 1 == interrupt pins disabled
+        controller1_int_en_i    : in    std_logic;
         -- Interrupt pins
-        syscon_be_int_o         : out   std_logic;
-        syscon_sb_int_o         : out   std_logic;
-        cell_be_int_i           : in    std_logic;
-        cell_sb_int_i           : in    std_logic;
+        controller0_be_int_o    : out   std_logic;
+        controller0_sb_int_o    : out   std_logic;
+        peripheral_be_int_i     : in    std_logic;
+        peripheral_sb_int_i     : in    std_logic;
         -- Logic Analyzer Tap Pins
         logic_analyzer_ce_o     : out   std_logic;
         logic_analyzer_clk_o    : out   std_logic;
@@ -46,65 +48,65 @@ end spi_mitm_top;
 
 architecture Behavioral of spi_mitm_top is
 
-signal cell_spi_copi_s: std_logic;
+signal peripheral_spi_copi_s: std_logic;
 
 begin
 
-OBUF_cell_spi_copi_o : OBUF
+OBUF_peripheral_spi_copi_o : OBUF
     generic map (
         DRIVE => 8,
         IOSTANDARD => "DEFAULT",
         SLEW => "SLOW")
     port map (
-        O => cell_spi_copi_o, -- Buffer output (connect directly to top-level port)
-        I => cell_spi_copi_s -- Buffer input
+        O => peripheral_spi_copi_o, -- Buffer output (connect directly to top-level port)
+        I => peripheral_spi_copi_s -- Buffer input
     );
 
-spi_mtim_mux_proc: process(intercept_spi_en_i, intercept_int_en_i, syscon_spi_ce_i,
-                           syscon_spi_clk_i, syscon_spi_copi_i,
-                           cell_spi_cipo_i, intercept_spi_ce_io,
-                           intercept_spi_clk_io, intercept_spi_copi_io,
-                           cell_be_int_i, cell_sb_int_i, cell_spi_copi_s)
+spi_mtim_mux_proc: process(controller1_spi_en_i, controller1_int_en_i, controller0_spi_ce_i,
+                           controller0_spi_clk_i, controller0_spi_copi_i,
+                           peripheral_spi_cipo_i, controller1_spi_ce_io,
+                           controller1_spi_clk_io, controller1_spi_copi_io,
+                           peripheral_be_int_i, peripheral_sb_int_i, peripheral_spi_copi_s)
 
 variable spi_ce_tap_v, spi_clk_tap_v, spi_cipo_tap_v,
         spi_copi_tap_v, spi_be_int_tap_v, spi_sb_int_tap_v: std_logic;
 
 begin
 
-spi_be_int_tap_v := cell_be_int_i;
-syscon_be_int_o <= spi_be_int_tap_v when intercept_int_en_i = '0' else '1';
+spi_be_int_tap_v := peripheral_be_int_i;
+controller0_be_int_o <= spi_be_int_tap_v when controller1_int_en_i = '0' else '1';
 logic_analyzer_be_int_o <= spi_be_int_tap_v;
 
-spi_sb_int_tap_v := cell_sb_int_i;
-syscon_sb_int_o <= spi_sb_int_tap_v when intercept_int_en_i = '0' else '1';
+spi_sb_int_tap_v := peripheral_sb_int_i;
+controller0_sb_int_o <= spi_sb_int_tap_v when controller1_int_en_i = '0' else '1';
 logic_analyzer_sb_int_o <= spi_sb_int_tap_v;
 
-spi_ce_tap_v := syscon_spi_ce_i when intercept_spi_en_i = '0' else intercept_spi_ce_io;
-cell_spi_ce_o <= spi_ce_tap_v;
+spi_ce_tap_v := controller0_spi_ce_i when controller1_spi_en_i = '0' else controller1_spi_ce_io;
+peripheral_spi_ce_o <= spi_ce_tap_v;
 logic_analyzer_ce_o <= spi_ce_tap_v;
 
-spi_clk_tap_v := syscon_spi_clk_i when intercept_spi_en_i = '0' else intercept_spi_clk_io;
-cell_spi_clk_o <= spi_clk_tap_v;
+spi_clk_tap_v := controller0_spi_clk_i when controller1_spi_en_i = '0' else controller1_spi_clk_io;
+peripheral_spi_clk_o <= spi_clk_tap_v;
 logic_analyzer_clk_o <= spi_clk_tap_v;
 
-if intercept_spi_en_i = '0' then
-    intercept_spi_ce_io <= syscon_spi_ce_i;
-    intercept_spi_clk_io <= syscon_spi_clk_i;
-    intercept_spi_copi_io <= syscon_spi_copi_i;
+if controller1_spi_en_i = '0' then
+    controller1_spi_ce_io <= controller0_spi_ce_i;
+    controller1_spi_clk_io <= controller0_spi_clk_i;
+    controller1_spi_copi_io <= controller0_spi_copi_i;
 else
-    intercept_spi_ce_io <= 'Z';
-    intercept_spi_clk_io <= 'Z';
-    intercept_spi_copi_io <= 'Z';
+    controller1_spi_ce_io <= 'Z';
+    controller1_spi_clk_io <= 'Z';
+    controller1_spi_copi_io <= 'Z';
 end if;
 
-spi_copi_tap_v := syscon_spi_copi_i when intercept_spi_en_i = '0' else intercept_spi_copi_io;
-cell_spi_copi_s <= spi_copi_tap_v;
-logic_analyzer_copi_o <= cell_spi_copi_s;
+spi_copi_tap_v := controller0_spi_copi_i when controller1_spi_en_i = '0' else controller1_spi_copi_io;
+peripheral_spi_copi_s <= spi_copi_tap_v;
+logic_analyzer_copi_o <= peripheral_spi_copi_s;
 
-spi_cipo_tap_v := cell_spi_cipo_i;
+spi_cipo_tap_v := peripheral_spi_cipo_i;
 logic_analyzer_cipo_o <= spi_cipo_tap_v;
-intercept_spi_cipo_o <= spi_cipo_tap_v when intercept_spi_en_i = '1' else '0';
-syscon_spi_cipo_o <= spi_cipo_tap_v when intercept_spi_en_i = '0' else '0';
+controller1_spi_cipo_o <= spi_cipo_tap_v when controller1_spi_en_i = '1' else '0';
+controller0_spi_cipo_o <= spi_cipo_tap_v when controller1_spi_en_i = '0' else '0';
 
 end process spi_mtim_mux_proc;
 

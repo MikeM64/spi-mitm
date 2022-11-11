@@ -1,5 +1,5 @@
 --
--- SPI MITM
+-- SPI MITM - ISE Port
 --
 -- (c) MikeM64 - 2022
 --
@@ -8,8 +8,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-library UNISIM;
-use UNISIM.vcomponents.all;
+--library UNISIM;
+--use UNISIM.vcomponents.all;
 
 entity spi_mitm_top is
     Port (
@@ -52,15 +52,15 @@ signal peripheral_spi_copi_s: std_logic;
 
 begin
 
-OBUF_peripheral_spi_copi_o : OBUF
-    generic map (
-        DRIVE => 8,
-        IOSTANDARD => "DEFAULT",
-        SLEW => "SLOW")
-    port map (
-        O => peripheral_spi_copi_o, -- Buffer output (connect directly to top-level port)
-        I => peripheral_spi_copi_s -- Buffer input
-    );
+--OBUF_peripheral_spi_copi_o : OBUF
+--    generic map (
+--        DRIVE => 8,
+--        IOSTANDARD => "DEFAULT",
+--        SLEW => "SLOW")
+--    port map (
+--        O => peripheral_spi_copi_o, -- Buffer output (connect directly to top-level port)
+--        I => peripheral_spi_copi_s -- Buffer input
+--    );
 
 spi_mtim_mux_proc: process(controller1_spi_en_i, controller1_int_en_i, controller0_spi_ce_i,
                            controller0_spi_clk_i, controller0_spi_copi_i,
@@ -74,18 +74,43 @@ variable spi_ce_tap_v, spi_clk_tap_v, spi_cipo_tap_v,
 begin
 
 spi_be_int_tap_v := peripheral_be_int_i;
-controller0_be_int_o <= spi_be_int_tap_v when controller1_int_en_i = '0' else '1';
+
+--controller0_be_int_o <= spi_be_int_tap_v when controller1_int_en_i = '0' else '1';
+if controller1_int_en_i = '0' then
+    controller0_be_int_o <= spi_be_int_tap_v;
+else
+    controller0_be_int_o <= '1';
+end if;
+
 logic_analyzer_be_int_o <= spi_be_int_tap_v;
 
 spi_sb_int_tap_v := peripheral_sb_int_i;
-controller0_sb_int_o <= spi_sb_int_tap_v when controller1_int_en_i = '0' else '1';
+
+--controller0_sb_int_o <= spi_sb_int_tap_v when controller1_int_en_i = '0' else '1';
+if controller1_int_en_i = '0' then
+    controller0_sb_int_o <= spi_sb_int_tap_v;
+else
+    controller0_sb_int_o <= '1';
+end if;
+
 logic_analyzer_sb_int_o <= spi_sb_int_tap_v;
 
-spi_ce_tap_v := controller0_spi_ce_i when controller1_spi_en_i = '0' else controller1_spi_ce_io;
+--spi_ce_tap_v := controller0_spi_ce_i when controller1_spi_en_i = '0' else controller1_spi_ce_io;
+if controller1_spi_en_i = '0' then
+    spi_ce_tap_v := controller0_spi_ce_i;
+else
+    spi_ce_tap_v := controller1_spi_ce_io;
+end if;
+
 peripheral_spi_ce_o <= spi_ce_tap_v;
 logic_analyzer_ce_o <= spi_ce_tap_v;
 
-spi_clk_tap_v := controller0_spi_clk_i when controller1_spi_en_i = '0' else controller1_spi_clk_io;
+--spi_clk_tap_v := controller0_spi_clk_i when controller1_spi_en_i = '0' else controller1_spi_clk_io;
+if controller1_spi_en_i = '0' then
+    spi_clk_tap_v := controller0_spi_clk_i;
+else
+    spi_clk_tap_v := controller1_spi_clk_io;
+end if;
 peripheral_spi_clk_o <= spi_clk_tap_v;
 logic_analyzer_clk_o <= spi_clk_tap_v;
 
@@ -99,14 +124,33 @@ else
     controller1_spi_copi_io <= 'Z';
 end if;
 
-spi_copi_tap_v := controller0_spi_copi_i when controller1_spi_en_i = '0' else controller1_spi_copi_io;
+--spi_copi_tap_v := controller0_spi_copi_i when controller1_spi_en_i = '0' else controller1_spi_copi_io;
+if controller1_spi_en_i = '0' then
+    spi_copi_tap_v := controller0_spi_copi_i;
+else
+    spi_copi_tap_v := controller1_spi_copi_io;
+end if;
 peripheral_spi_copi_s <= spi_copi_tap_v;
 logic_analyzer_copi_o <= peripheral_spi_copi_s;
+peripheral_spi_copi_o <= peripheral_spi_copi_s;
 
 spi_cipo_tap_v := peripheral_spi_cipo_i;
 logic_analyzer_cipo_o <= spi_cipo_tap_v;
-controller1_spi_cipo_o <= spi_cipo_tap_v when controller1_spi_en_i = '1' else '0';
-controller0_spi_cipo_o <= spi_cipo_tap_v when controller1_spi_en_i = '0' else '0';
+
+--controller1_spi_cipo_o <= spi_cipo_tap_v when controller1_spi_en_i = '1' else '0';
+if controller1_spi_en_i = '1' then
+    controller1_spi_cipo_o <= spi_cipo_tap_v;
+else
+    controller1_spi_cipo_o <= '0';
+end if;
+
+--controller0_spi_cipo_o <= spi_cipo_tap_v when controller1_spi_en_i = '0' else '0';
+if controller1_spi_en_i = '0' then
+    controller0_spi_cipo_o <= spi_cipo_tap_v;
+else
+    controller0_spi_cipo_o <= '0';
+end if;
+
 
 end process spi_mtim_mux_proc;
 

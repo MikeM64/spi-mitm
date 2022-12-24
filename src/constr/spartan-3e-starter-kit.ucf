@@ -65,7 +65,7 @@ NET "controller0_spi_copi_i" LOC = "C5" | IOSTANDARD = LVCMOS33 | SLEW = FAST | 
 NET "peripheral_spi_ce_o" LOC = "A6" | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 ;
 NET "peripheral_spi_clk_o" LOC = "B6" | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 ;
 NET "peripheral_spi_cipo_i" LOC = "E7" | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 ;
-NET "peripheral_spi_copi_o" LOC = "F7" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8 ;
+NET "peripheral_spi_copi_o" LOC = "F7" | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 ;
 # These four connections are shared with the J4 6-pin accessory header
 NET "controller1_spi_ce_io" LOC = "D7" | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 ;
 NET "controller1_spi_clk_io" LOC = "C7" | IOSTANDARD = LVCMOS33 | SLEW = FAST | DRIVE = 8 ;
